@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import net.darkhax.botbase.BotBase;
 import net.darkhax.botbase.commands.ManagerCommands;
 import net.darkhax.botbase.lib.ScheduledTimer;
+import net.foldingcoin.twitter2discord.commands.CommandChannel;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -27,8 +28,7 @@ public class T2DBot extends BotBase {
     
     @Override
     public void registerCommands(ManagerCommands handler) {
-        // register net.foldingcoin.twitter2discord.commands here
-        
+        handler.registerCommand("link" , new CommandChannel());
     }
     
     @Override
@@ -50,7 +50,7 @@ public class T2DBot extends BotBase {
     
     
     public static void checkTweets(){
-        
+    
     }
     
     
