@@ -1,18 +1,15 @@
 package net.foldingcoin.twitter2discord;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import net.darkhax.botbase.BotBase;
 import net.darkhax.botbase.commands.ManagerCommands;
 import net.darkhax.botbase.lib.ScheduledTimer;
 import net.foldingcoin.twitter2discord.commands.CommandChannel;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 import twitter4j.*;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class T2DBot extends BotBase {
     
@@ -21,6 +18,7 @@ public class T2DBot extends BotBase {
     
     private IRole roleAdmin;
     private IRole roleTeamFLDC;
+    private Twitter twitter;
     
     public T2DBot(String botName, Configuration config) {
         
@@ -43,41 +41,61 @@ public class T2DBot extends BotBase {
     @Override
     public void onSucessfulLogin(IDiscordClient instance) {
         
-        
-        this.timer.scheduleRepeating(0, TimeUnit.MINUTES.toMillis(1), T2DBot::checkTweets);
+        twitter = TwitterFactory.getSingleton();
+        this.timer.scheduleRepeating(0, TimeUnit.SECONDS.toMillis(15), this::checkTweets);
         
         // Guild Specific init
         this.roleAdmin = instance.getRoleByID(405483553904656386L);
         this.roleTeamFLDC = instance.getRoleByID(379170648208965633L);
     }
     
-    private static LinkedList<Long> statusList = new LinkedList<>();
+    private Map<String, List<Status>> statusMap = new HashMap<>();
     
-    public static void checkTweets() {
+    public void checkTweets() {
         try {
-            Twitter twitter = TwitterFactory.getSingleton();
-            List<Status> statuses = twitter.getUserTimeline("Jaredlll08");
-            
-            System.out.println("Showing home timeline.");
-            if(statusList.isEmpty()) {
-                for(Status status : statuses) {
-                    statusList.add(status.getId());
-                }
-                return;
-            }
-            LinkedList<Long> list = new LinkedList<>(statusList);
-            for(Status status : statuses) {
-                list.remove(status.getId());
-            }
-            for(Status status : statuses) {
-                if(list.contains(status.getId())) {
-                    System.out.println(status);
-                    if(status.getInReplyToScreenName() == null || status.isRetweetedByMe()) {
-                        System.out.println(status.getUser().getName() + ":" + status.getText());
+            Map<String, List<Long>> channels = BotLauncher.instance.getConfig().getChannelsToPostIn();
+            for(String s : channels.keySet()) {
+                
+                List<Status> statuses = twitter.getUserTimeline(s);
+                
+                List<Status> statusList = statusMap.getOrDefault(s, statuses);
+                
+                List<Status> list = new ArrayList<>();
+                
+                for(Status newStat : statuses) {
+                    boolean valid = true;
+                    for(Status oldStat : statusList) {
+                        if(newStat.getId() == oldStat.getId()) {
+                            valid = false;
+                        }
                     }
-                    statusList.add(status.getId());
+                    if(valid) {
+                        list.add(newStat);
+                    }
                 }
-                //
+                
+                for(Status status : list) {
+                    if(status.getInReplyToScreenName() == null || status.isRetweetedByMe()) {
+                        for(Long id : channels.get(s)) {
+                            IChannel channel = BotLauncher.instance.instance.getChannelByID(id);
+                            String url = "https://twitter.com/" + status.getUser().getScreenName() + "/status/" + status.getId();
+                            channel.sendMessage(url);
+                            //                            EmbedBuilder builder = new EmbedBuilder();
+                            //                            builder.withTitle("New Tweet!");
+                            //                            builder.appendField("Author: ", status.getUser().getScreenName(), true);
+                            //                            if(status.isRetweetedByMe()) {
+                            //                                builder.appendField("Contents: ", status.getText().substring(3), false);
+                            //                            }else{
+                            //                                builder.appendField("Contents: ", status.getText(), false);
+                            //                            }
+                            //                            builder.withTimestamp(status.getCreatedAt().toInstant());
+                            //                            builder.withImage(status.getUser().getProfileImageURL());
+                            //                            builder.withColor(Color.CYAN);
+                            //                            channel.sendMessage(builder.build());
+                        }
+                    }
+                }
+                statusMap.put(s, statuses);
             }
         } catch(Exception e) {
             e.printStackTrace();

@@ -1,15 +1,10 @@
 package net.foldingcoin.twitter2discord;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.*;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * This class is responsible for the serialization of the configuration file.
@@ -33,7 +28,7 @@ public class Configuration {
     private String commandKey = "!key";
     
     @Expose
-    public static final Map<String, List<Long>> channelsToPostIn = new LinkedHashMap<>();
+    public final Map<String, List<Long>> channelsToPostIn = new LinkedHashMap<>();
     
     public void saveConfig() {
         
@@ -103,7 +98,7 @@ public class Configuration {
         this.commandKey = commandKey;
     }
     
-    public static Map<String, List<Long>> getChannelsToPostIn() {
+    public Map<String, List<Long>> getChannelsToPostIn() {
         return channelsToPostIn;
     }
 }
