@@ -2,13 +2,14 @@ plugins {
     id 'java'
 }
 
-group 'net.foldingcoin'
+group 'net.foldingcoin.twitter2discord'
 version '1.0.0'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    jcenter()
 
     maven {
 
@@ -17,8 +18,35 @@ repositories {
 }
 
 dependencies {
-    compile group: 'net.darkhax.discordbotbase', name: 'DiscordBotBase', version:'1.0.15'
+    compile group: 'net.darkhax.discordbotbase', name: 'DiscordBotBase', version: '1.0.15'
     compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.1'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'T2D', 'Implementation-Version': '1.0.0', 'Main-Class': 'net.foldingcoin.twitter2discord.BotLauncher'
+    }
+    baseName = project.name + '-all'
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it).matching {
+                exclude 'META-INF/**.RSA'
+                exclude 'META-INF/MANIFEST.MF'
+                exclude 'META-INF/log4j-provider.properties'
+            }
+        }
+    }
+    with jar
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'net.foldingcoin.twitter2discord.BotLauncher'
+        )
+    }
 }

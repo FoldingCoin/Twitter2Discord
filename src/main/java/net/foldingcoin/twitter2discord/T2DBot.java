@@ -80,18 +80,6 @@ public class T2DBot extends BotBase {
                             IChannel channel = BotLauncher.instance.instance.getChannelByID(id);
                             String url = "https://twitter.com/" + status.getUser().getScreenName() + "/status/" + status.getId();
                             channel.sendMessage(url);
-                            //                            EmbedBuilder builder = new EmbedBuilder();
-                            //                            builder.withTitle("New Tweet!");
-                            //                            builder.appendField("Author: ", status.getUser().getScreenName(), true);
-                            //                            if(status.isRetweetedByMe()) {
-                            //                                builder.appendField("Contents: ", status.getText().substring(3), false);
-                            //                            }else{
-                            //                                builder.appendField("Contents: ", status.getText(), false);
-                            //                            }
-                            //                            builder.withTimestamp(status.getCreatedAt().toInstant());
-                            //                            builder.withImage(status.getUser().getProfileImageURL());
-                            //                            builder.withColor(Color.CYAN);
-                            //                            channel.sendMessage(builder.build());
                         }
                     }
                 }

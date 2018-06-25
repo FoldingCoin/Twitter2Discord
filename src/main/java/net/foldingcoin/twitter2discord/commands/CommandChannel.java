@@ -32,6 +32,6 @@ public class CommandChannel extends CommandModerator {
     @Override
     public String getDescription() {
         
-        return "Adds a channel as a mirror channel for a discord bot.";
+        return "Adds a channel as a mirror channel for the discord bot.";
     }
 }
